@@ -17,3 +17,9 @@ out/
 logbody*
 Scratch*
 keeplocal*
+
+# misc
+.*.sw?
+*.vim
+TAGS
+tags
