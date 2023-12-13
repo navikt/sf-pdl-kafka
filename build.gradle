@@ -48,7 +48,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven {
-        url "http://packages.confluent.io/maven"
+        url "https://packages.confluent.io/maven"
     }
 
     ["maven-release"].each { repo ->
@@ -83,9 +83,9 @@ dependencies {
     implementation("no.nav.syfo.dialogmote.avro:isdialogmote-schema:1.0.5")
 
     // compile "org.apache.avro:avro:1.10.1"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.1"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0"
 
-    compileOnly "javax.annotation:javax.annotation-api:$javax_annotation_version"
+    implementation "javax.annotation:javax.annotation-api:$javax_annotation_version"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutine"
 
