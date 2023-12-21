@@ -21,8 +21,8 @@ import java.io.File
  */
 class KafkaToSFPoster<K, V>(
     val settings: List<Settings> = listOf(),
+    val filter: ((String, Long) -> Boolean)? = null,
     val modifier: ((String, Long) -> String)? = null,
-    val filter: ((String, Long) -> Boolean)? = null
 ) {
     private val log = KotlinLogging.logger { }
 

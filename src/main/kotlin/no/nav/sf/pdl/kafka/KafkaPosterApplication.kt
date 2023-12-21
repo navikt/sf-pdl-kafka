@@ -17,7 +17,7 @@ class KafkaPosterApplication<K, V>(
     filter: ((String, Long) -> Boolean)? = null,
     modifier: ((String, Long) -> String)? = null
 ) {
-    val poster = KafkaToSFPoster<K, V>(settings, modifier, filter)
+    val poster = KafkaToSFPoster<K, V>(settings, filter, modifier)
     val gtPoster = KafkaToSFPoster<K, V>(settings)
 
     private val bootstrapWaitTime = envAsLong(env_MS_BETWEEN_WORK)
