@@ -39,7 +39,6 @@ class KafkaToSFPoster<K, V>(
     val avroKeyValue = settings.contains(Settings.AVRO_KEY_VALUE)
     val avroValue = settings.contains(Settings.AVRO_VALUE)
 
-    var samples = numberOfSamplesInSampleRun
     var hasRunOnce = false
     fun runWorkSession(kafkaTopic: String) {
         if (runOnce && hasRunOnce) {
@@ -81,20 +80,15 @@ class KafkaToSFPoster<K, V>(
                     kCommonMetrics.noOfEventsBlockedByFilter.inc((cRecordsPreFiltered.count() - cRecords.count()).toDouble())
                     consumedInCurrentRun += cRecordsPreFiltered.count()
                     pastFilterInCurrentRun += cRecords.count()
-                    if (sample && samples > 0) {
-                        cRecords.forEach {
-                            if (samples > 0) {
-                                File("/tmp/samples-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
-                                if (modifier != null) {
-                                    File("/tmp/samplesAfterModifier-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
-                                }
-                                samples--
-                                log.info { "Saved sample. Samples left: $samples" }
-                            }
-                        }
-                    }
 
                     val kafkaMessages = cRecords.mapIndexed { i, it ->
+                        if (sample && i < numberOfSamplesInSampleRun) {
+                            File("/tmp/samples-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
+                            if (modifier != null) {
+                                File("/tmp/samplesAfterModifier-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
+                            }
+                            log.info { "Saved sample. Samples left: ${numberOfSamplesInSampleRun - 1 - i}" }
+                        }
                         val modifiedValue = it.value().toString().let { value ->
                             if (modifier == null) value.toString().encodeB64() else modifier.invoke(value.toString(), it.offset()).encodeB64()
                         }
