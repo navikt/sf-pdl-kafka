@@ -1,12 +1,12 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: {{ DEPLOY_APP }}
+  name: "{{ DEPLOY_APP }}"
   namespace: teamcrm
   labels:
     team: teamcrm
 spec:
-  image: {{ image }}
+  image: "{{ image }}"
   port: 8080
   replicas:
     min: 1
@@ -57,6 +57,6 @@ spec:
     - name: SF_TOKENHOST
       value: https://login.salesforce.com
     - name: DEPLOY_APP
-      value: {{ DEPLOY_APP }}
+      value: "{{ DEPLOY_APP }}"
     - name: WHITELIST_FILE
       value: '/whitelist/prod.json'

@@ -65,9 +65,9 @@ class KafkaToSFPoster<K, V>(
         }
 
         sfClient.enablesObjectPost { postActivities ->
-            val isOk = consumer.consume { cRecordsPreFilter ->
+            val isOk = consumer.consume { /* business logic start */ cRecordsPreFiltered ->
                 hasRunOnce = true
-                if (cRecordsPreFilter.isEmpty) {
+                if (cRecordsPreFiltered.isEmpty) {
                     if (consumedInCurrentRun == 0) {
                         log.info { "Work: Finished session without consuming. Number if work sessions without event during lifetime of app: $numberOfWorkSessionsWithoutEvents" }
                     } else {
@@ -76,10 +76,10 @@ class KafkaToSFPoster<K, V>(
                     KafkaConsumerStates.IsFinished
                 } else {
                     numberOfWorkSessionsWithoutEvents = 0
-                    kCommonMetrics.noOfConsumedEvents.inc(cRecordsPreFilter.count().toDouble())
-                    val cRecords = if (filter == null) cRecordsPreFilter else cRecordsPreFilter.filter { filter!!(it.value().toString(), it.offset()) }
-                    kCommonMetrics.noOfEventsBlockedByFilter.inc((cRecordsPreFilter.count() - cRecords.count()).toDouble())
-                    consumedInCurrentRun += cRecordsPreFilter.count()
+                    kCommonMetrics.noOfConsumedEvents.inc(cRecordsPreFiltered.count().toDouble())
+                    val cRecords = if (filter == null) cRecordsPreFiltered else cRecordsPreFiltered.filter { filter!!(it.value().toString(), it.offset()) }
+                    kCommonMetrics.noOfEventsBlockedByFilter.inc((cRecordsPreFiltered.count() - cRecords.count()).toDouble())
+                    consumedInCurrentRun += cRecordsPreFiltered.count()
                     pastFilterInCurrentRun += cRecords.count()
                     if (sample && samples > 0) {
                         cRecords.forEach {
@@ -133,6 +133,7 @@ class KafkaToSFPoster<K, V>(
                         }
                     }
                 }
+                /* business logic end */
             }
             if (!isOk) {
                 // Consumer issues is expected due to rotation of credentials, relocating app by kubernetes etc and is not critical.

@@ -18,7 +18,7 @@ class KafkaPosterApplication<K, V>(
     modifier: ((String, Long) -> String)? = null
 ) {
     val poster = KafkaToSFPoster<K, V>(settings, modifier, filter)
-    val posterPlain = KafkaToSFPoster<K, V>(settings)
+    val gtPoster = KafkaToSFPoster<K, V>(settings)
 
     private val bootstrapWaitTime = envAsLong(env_MS_BETWEEN_WORK)
 
@@ -37,7 +37,7 @@ class KafkaPosterApplication<K, V>(
             stop -> Unit.also { log.info { "Stopped" } }
             !stop -> {
                 poster.runWorkSession(env(env_KAFKA_TOPIC_PERSONDOKUMENT))
-                posterPlain.runWorkSession(env(env_KAFKA_TOPIC_GEOGRAFISKTILKNYTNING))
+                gtPoster.runWorkSession(env(env_KAFKA_TOPIC_GEOGRAFISKTILKNYTNING))
                 conditionalWait(bootstrapWaitTime)
                 loop()
             }
