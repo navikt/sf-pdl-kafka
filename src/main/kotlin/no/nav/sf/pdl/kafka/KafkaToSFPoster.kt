@@ -94,12 +94,14 @@ class KafkaToSFPoster<K, V>(
                         }
                     }
 
-                    val kafkaMessages = cRecords.map {
+                    val kafkaMessages = cRecords.mapIndexed { i, it ->
+                        val modifiedValue = it.value().toString().let { value ->
+                            if (modifier == null) value.toString().encodeB64() else modifier.invoke(value.toString(), it.offset()).encodeB64()
+                        }
                         KafkaMessage(
                             CRM_Topic__c = it.topic(),
                             CRM_Key__c = if (encodeKey) it.key().toString().encodeB64() else it.key().toString(),
-                            CRM_Value__c = it.value().toString()
-                                .let { value -> if (modifier == null) value.toString().encodeB64() else modifier.invoke(value.toString(), it.offset()).encodeB64() }
+                            CRM_Value__c = modifiedValue
                         )
                     }
 
