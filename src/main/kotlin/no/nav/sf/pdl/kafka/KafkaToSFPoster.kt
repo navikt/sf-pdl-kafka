@@ -64,9 +64,9 @@ class KafkaToSFPoster<K, V>(
         }
 
         sfClient.enablesObjectPost { postActivities ->
-            val isOk = consumer.consume { /* business logic start */ cRecordsPreFiltered ->
+            val isOk = consumer.consume { /* business logic start */ cRecordsUnfiltered ->
                 hasRunOnce = true
-                if (cRecordsPreFiltered.isEmpty) {
+                if (cRecordsUnfiltered.isEmpty) {
                     if (consumedInCurrentRun == 0) {
                         log.info { "Work: Finished session without consuming. Number if work sessions without event during lifetime of app: $numberOfWorkSessionsWithoutEvents" }
                     } else {
@@ -75,10 +75,10 @@ class KafkaToSFPoster<K, V>(
                     KafkaConsumerStates.IsFinished
                 } else {
                     numberOfWorkSessionsWithoutEvents = 0
-                    kCommonMetrics.noOfConsumedEvents.inc(cRecordsPreFiltered.count().toDouble())
-                    val cRecords = if (filter == null) cRecordsPreFiltered else cRecordsPreFiltered.filter { filter!!(it.value().toString(), it.offset()) }
-                    kCommonMetrics.noOfEventsBlockedByFilter.inc((cRecordsPreFiltered.count() - cRecords.count()).toDouble())
-                    consumedInCurrentRun += cRecordsPreFiltered.count()
+                    kCommonMetrics.noOfConsumedEvents.inc(cRecordsUnfiltered.count().toDouble())
+                    val cRecords = if (filter == null) cRecordsUnfiltered else cRecordsUnfiltered.filter { filter!!(it.value().toString(), it.offset()) }
+                    kCommonMetrics.noOfEventsBlockedByFilter.inc((cRecordsUnfiltered.count() - cRecords.count()).toDouble())
+                    consumedInCurrentRun += cRecordsUnfiltered.count()
                     pastFilterInCurrentRun += cRecords.count()
 
                     val kafkaMessages = cRecords.mapIndexed { i, it ->
