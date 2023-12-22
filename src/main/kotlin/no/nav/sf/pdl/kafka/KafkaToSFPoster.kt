@@ -82,20 +82,20 @@ class KafkaToSFPoster<K, V>(
                     pastFilterInCurrentRun += cRecords.count()
 
                     val kafkaMessages = cRecords.mapIndexed { i, it ->
+                        val modifiedValue = it.value().toString().let { value ->
+                            if (modifier == null) value.toString() else modifier.invoke(value.toString(), it.offset())
+                        }
                         if (sample && i < numberOfSamplesInSampleRun) {
                             File("/tmp/samples-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${it.value()}\n\n")
                             if (modifier != null) {
-                                File("/tmp/samplesAfterModifier-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${modifier.invoke(it.value().toString(), it.offset())}\n\n")
+                                File("/tmp/samplesAfterModifier-$kafkaTopic").appendText("KEY: ${it.key()}\nVALUE: ${modifiedValue}\n\n")
                             }
                             log.info { "Saved sample. Samples left: ${numberOfSamplesInSampleRun - 1 - i}" }
-                        }
-                        val modifiedValue = it.value().toString().let { value ->
-                            if (modifier == null) value.toString().encodeB64() else modifier.invoke(value.toString(), it.offset()).encodeB64()
                         }
                         KafkaMessage(
                             CRM_Topic__c = it.topic(),
                             CRM_Key__c = if (encodeKey) it.key().toString().encodeB64() else it.key().toString(),
-                            CRM_Value__c = modifiedValue
+                            CRM_Value__c = modifiedValue.encodeB64()
                         )
                     }
 
