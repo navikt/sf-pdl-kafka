@@ -11,7 +11,7 @@ jobs:
     secrets: inherit
     with:
       DEPLOY_APP: sf-pdl-kafka # sf-pdl-kafka # sf-geografisktilknytning
-      DEPLOY_CLUSTER: prod-gcp
+      DEPLOY_CLUSTER: dev-gcp
 
       # Start consuming from a particular offset
       # Note that the consumer will go there each time the pod reboots, so make sure you turn this off once done
